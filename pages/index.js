@@ -1,8 +1,53 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
+export function Box({char, winner}) {
+  return <span style={{
+    border: '1px solid', 
+    fontSize: '4rem', 
+    width: '45px', 
+    minHeight: '45px', 
+    display: 'inline-block',
+    backgroundColor: winner === true ? 'green' : 'red'
+  }}>{char}</span>
+}
+
+export function Row({characters, winner}) {
+  const WORD_LENGTH = 5
+  const wordArr = characters.padEnd(WORD_LENGTH, ' ').split('')
+  return (
+    <div style={{display: 'flex'}}>
+      {wordArr.map((char, idx) => {
+        return <Box winner={winner} key={char + idx} char={char} />
+      })}
+    </div>
+  )
+}
+
 export default function Home() {
+  const [curChars, setCurChars] = useState('')
+  const [winner, setWinner] = useState(false)
+  const ANSWER = 'mouse'
+  useEffect(() => {
+    function updateGuess(ev) {
+        setCurChars(oldDatabase => {
+          console.log('old state: ' + oldDatabase)
+          console.log('new state: ' + ev.key)
+          if (oldDatabase.length == 5) {
+            if (oldDatabase == ANSWER) {
+              setWinner(true)
+            }
+            return oldDatabase
+          } else {
+            return oldDatabase + ev.key
+          }
+        })
+    }
+    document.addEventListener('keyup', updateGuess)
+    return () => document.removeEventListener('keyup', updateGuess)
+  }, [])
   return (
     <div className={styles.container}>
       <Head>
@@ -13,43 +58,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="https://nextjs.org">Jerdle!</a>
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+      <Row characters={curChars} winner={winner} />
+     
       </main>
 
       <footer className={styles.footer}>
